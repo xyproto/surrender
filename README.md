@@ -2,7 +2,7 @@
 
 ## Surrender
 
-A pure-go non-antialiased TinySVG 1.2 renderer created with some help from GPT4.
+The early beginnings of a pure-go non-antialiased TinySVG 1.2 renderer.
 
 The goal is to be able to render TinySVG 1.2 files.
 
