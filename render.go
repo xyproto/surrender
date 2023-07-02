@@ -77,10 +77,10 @@ func DrawLine(img *image.RGBA, p1, p2 image.Point, clr color.Color) {
 	}
 }
 
-// Render function
-func Render(elements []SvgElement, img *image.RGBA, clr color.Color) {
-	for _, element := range elements {
-		element.Draw(img, clr)
+// Render function takes SVG elements and an image, and renders the elements onto the image
+func Render(elements []SvgElement, img *image.RGBA) {
+	for _, el := range elements {
+		el.Draw(img, el.Color())
 	}
 }
 

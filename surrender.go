@@ -27,11 +27,11 @@ func NewColoredImage(width, height int, clr color.Color) *image.RGBA {
 	return img
 }
 
-// RenderAndSaveSVG takes SVG elements and color, creates an image, renders the elements onto the image and saves it as PNG
-func RenderAndSaveSVG(elements []SvgElement, filename string, bgColor, elementColor color.Color) error {
+// RenderAndSaveSVG takes SVG elements and a background color, creates an image,
+// renders the elements onto the image and saves it as PNG
+func RenderAndSaveSVG(elements []SvgElement, filename string, bgColor color.Color) error {
 	img := NewColoredImage(Width, Height, bgColor)
-	Render(elements, img, elementColor)
-
+	Render(elements, img)
 	err := SavePNG(img, filename)
 	if err != nil {
 		return err

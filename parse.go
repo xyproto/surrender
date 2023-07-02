@@ -4,24 +4,47 @@ import (
 	"bufio"
 	"image"
 	"image/color"
-	"os"
 	"strconv"
 	"strings"
 	"unicode"
 
 	"github.com/beevik/etree"
+	"golang.org/x/image/colornames"
 )
 
 type SvgElement interface {
 	Draw(img *image.RGBA, color color.Color)
+	Color() color.Color
 }
 
+// SvgCircle struct
 type SvgCircle struct {
 	Cx, Cy, R int
+	Fill      color.Color
 }
 
+func (c SvgCircle) Color() color.Color {
+	return c.Fill
+}
+
+// SvgRectangle struct
 type SvgRectangle struct {
 	X, Y, Width, Height int
+	Fill                color.Color
+}
+
+func (r SvgRectangle) Color() color.Color {
+	return r.Fill
+}
+
+// SvgPath struct
+type SvgPath struct {
+	Commands []PathCommand
+	Fill     color.Color
+}
+
+func (p SvgPath) Color() color.Color {
+	return p.Fill
 }
 
 type PathCommand struct {
@@ -29,38 +52,29 @@ type PathCommand struct {
 	Points []image.Point
 }
 
-type SvgPath struct {
-	Commands []PathCommand
-}
-
-// Parse function
-func Parse(filename string) ([]SvgElement, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
+// ParseFile function
+func ParseFile(filename string) ([]SvgElement, error) {
 	doc := etree.NewDocument()
-	if _, err := doc.ReadFrom(file); err != nil {
+	if err := doc.ReadFromFile(filename); err != nil {
 		return nil, err
 	}
 
 	var elements []SvgElement
 	for _, el := range doc.SelectElement("svg").ChildElements() {
+		fillColor := getColor(el.SelectAttrValue("fill", "black"))
 		switch el.Tag {
 		case "circle":
 			x, _ := strconv.Atoi(el.SelectAttrValue("cx", "0"))
 			y, _ := strconv.Atoi(el.SelectAttrValue("cy", "0"))
 			r, _ := strconv.Atoi(el.SelectAttrValue("r", "0"))
-			elements = append(elements, SvgCircle{x, y, r})
+			elements = append(elements, SvgCircle{x, y, r, fillColor})
 
 		case "rect":
 			x, _ := strconv.Atoi(el.SelectAttrValue("x", "0"))
 			y, _ := strconv.Atoi(el.SelectAttrValue("y", "0"))
 			w, _ := strconv.Atoi(el.SelectAttrValue("width", "0"))
 			h, _ := strconv.Atoi(el.SelectAttrValue("height", "0"))
-			elements = append(elements, SvgRectangle{x, y, w, h})
+			elements = append(elements, SvgRectangle{x, y, w, h, fillColor})
 
 		case "path":
 			d := el.SelectAttrValue("d", "")
@@ -68,10 +82,20 @@ func Parse(filename string) ([]SvgElement, error) {
 			if err != nil {
 				return nil, err
 			}
+			path.Fill = fillColor
 			elements = append(elements, path)
 		}
 	}
+
 	return elements, nil
+}
+
+// getColor function
+func getColor(colorName string) color.Color {
+	if c, ok := colornames.Map[colorName]; ok {
+		return c
+	}
+	return color.RGBA{0, 0, 0, 255} // default to black if color name is not recognized
 }
 
 // parsePath function
@@ -124,5 +148,5 @@ func parsePath(d string) (SvgPath, error) {
 		commands = append(commands, cmd)
 	}
 
-	return SvgPath{commands}, nil
+	return SvgPath{Commands: commands, Fill: color.RGBA{0, 0, 0, 255}}, nil
 }

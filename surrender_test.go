@@ -7,7 +7,7 @@ import (
 )
 
 func TestRenderAndSaveSVG(t *testing.T) {
-	circle := SvgCircle{Cx: 250, Cy: 250, R: 50}
+	circle := SvgCircle{Cx: 250, Cy: 250, R: 50, Fill: color.RGBA{255, 0, 0, 255}}
 	elements := []SvgElement{circle}
 
 	filename := "test.png"
@@ -19,9 +19,8 @@ func TestRenderAndSaveSVG(t *testing.T) {
 
 	// Use a black background and a red circle
 	bgColor := color.RGBA{0, 0, 0, 255}
-	circleColor := color.RGBA{255, 0, 0, 255}
 
-	err := RenderAndSaveSVG(elements, filename, bgColor, circleColor)
+	err := RenderAndSaveSVG(elements, filename, bgColor)
 	if err != nil {
 		t.Fatalf("failed to render and save SVG: %s", err)
 	}

@@ -1,3 +1,6 @@
 # github.com/beevik/etree v1.2.0
 ## explicit; go 1.13
 github.com/beevik/etree
+# golang.org/x/image v0.8.0
+## explicit; go 1.12
+golang.org/x/image/colornames
