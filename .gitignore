@@ -1,2 +1,9 @@
 cmd/render/render
 cmd/render/*.svg
+cmd/render/output.png
+*.o
+*.bak
+*.swp
+*.tmp
+include.txt
+.DS_Store
