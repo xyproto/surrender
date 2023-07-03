@@ -45,6 +45,18 @@ func (p SvgPath) Draw(img *image.RGBA, clr color.Color) {
 	}
 }
 
+// Draw method for SvgGroup
+func (g SvgGroup) Draw(img *image.RGBA, clr color.Color) {
+	for _, el := range g.Elements {
+		el.Draw(img, el.Color())
+	}
+}
+
+// Draw method for SvgLine
+func (l SvgLine) Draw(img *image.RGBA, clr color.Color) {
+	DrawLine(img, image.Point{X: l.X1, Y: l.Y1}, image.Point{X: l.X2, Y: l.Y2}, clr)
+}
+
 // DrawLine function to draw a line on an image
 func DrawLine(img *image.RGBA, p1, p2 image.Point, clr color.Color) {
 	// Bresenham's line algorithm

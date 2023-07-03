@@ -62,12 +62,14 @@ func (g SvgGroup) Color() color.Color {
 	return g.Fill
 }
 
-// Implement Draw for SvgGroup
-func (g SvgGroup) Draw(img *image.RGBA, color color.Color) {
-	// Iterate over child elements and draw them
-	for _, el := range g.Elements {
-		el.Draw(img, color)
-	}
+// SvgLine struct
+type SvgLine struct {
+	X1, Y1, X2, Y2 int
+	Stroke         color.Color
+}
+
+func (l SvgLine) Color() color.Color {
+	return l.Stroke
 }
 
 // ParseFile function
@@ -101,6 +103,14 @@ func parseElements(elements []*etree.Element, defaultColor color.Color) ([]SvgEl
 			w, _ := strconv.Atoi(el.SelectAttrValue("width", "0"))
 			h, _ := strconv.Atoi(el.SelectAttrValue("height", "0"))
 			svgElements = append(svgElements, SvgRectangle{x, y, w, h, fillColor})
+
+		case "line":
+			x1, _ := strconv.Atoi(el.SelectAttrValue("x1", "0"))
+			y1, _ := strconv.Atoi(el.SelectAttrValue("y1", "0"))
+			x2, _ := strconv.Atoi(el.SelectAttrValue("x2", "0"))
+			y2, _ := strconv.Atoi(el.SelectAttrValue("y2", "0"))
+			strokeColor := getColor(el.SelectAttrValue("stroke", "black"))
+			svgElements = append(svgElements, SvgLine{x1, y1, x2, y2, strokeColor})
 
 		case "path":
 			d := el.SelectAttrValue("d", "")
