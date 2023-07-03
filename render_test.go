@@ -29,7 +29,12 @@ func TestRender(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			img := image.NewRGBA(image.Rect(0, 0, 302, 240))
+			width, height, err := GetSVGDimensions(tc.svgFile)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			img := image.NewRGBA(image.Rect(0, 0, width, height))
 			Render(elements, img)
 
 			for i, point := range tc.points {
@@ -43,8 +48,8 @@ func TestRender(t *testing.T) {
 				}
 			}
 			// If all the pixel tests pass, save the image to a PNG file.
-			//if err := SavePNG(img, tc.name+".png"); err != nil {
-			//t.Error(err)
+			//if err := SavePNG(img, tc.name); err != nil {
+				//t.Error(err)
 			//}
 		})
 	}
