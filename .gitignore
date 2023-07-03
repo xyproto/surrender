@@ -1,6 +1,6 @@
 cmd/render/render
 cmd/render/*.svg
-cmd/render/output.png
+cmd/render/*.png
 *.o
 *.bak
 *.swp
