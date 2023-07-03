@@ -8,14 +8,14 @@ import (
 
 func TestRender(t *testing.T) {
 	tt := []struct {
-		name    string
-		svgFile string
+		svgFile string // intput file
+		pngFile string // output file (if enabled)
 		points  []image.Point
 		colors  []color.Color
 	}{
 		{
-			name:    "testdata/rainforest_2c_opt.png",
 			svgFile: "testdata/rainforest_2c_opt.svg",
+			pngFile: "testdata/rainforest_2c_opt.png",
 			points:  []image.Point{image.Point{0, 0}},
 			colors:  []color.Color{color.RGBA{255, 255, 238, 255}},
 		},
@@ -23,7 +23,7 @@ func TestRender(t *testing.T) {
 	}
 
 	for _, tc := range tt {
-		t.Run(tc.name, func(t *testing.T) {
+		t.Run(tc.svgFile, func(t *testing.T) {
 			elements, err := ParseFile(tc.svgFile)
 			if err != nil {
 				t.Fatal(err)
@@ -48,8 +48,8 @@ func TestRender(t *testing.T) {
 				}
 			}
 			// If all the pixel tests pass, save the image to a PNG file.
-			//if err := SavePNG(img, tc.name); err != nil {
-				//t.Error(err)
+			//if err := SavePNG(img, tc.pngFile); err != nil {
+			//t.Error(err)
 			//}
 		})
 	}

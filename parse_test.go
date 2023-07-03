@@ -23,7 +23,7 @@ func TestParseFile(t *testing.T) {
 		assert.Equal(t, circle.Cx, 50)
 		assert.Equal(t, circle.Cy, 50)
 		assert.Equal(t, circle.R, 40)
-		assert.Equal(t, circle.Fill, color.RGBA{0, 0, 0, 255}) // assuming black color
+		assert.Equal(t, circle.Fill, color.RGBA{255, 0, 0, 255}) // assuming red color
 	})
 
 }
