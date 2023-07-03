@@ -72,7 +72,7 @@ func (l SvgLine) Color() color.Color {
 	return l.Stroke
 }
 
-// ParseFile function
+// ParseFile will try to parse the given TinySVG 1.2 file into a slice of SvgElements
 func ParseFile(filename string) ([]SvgElement, error) {
 	doc := etree.NewDocument()
 	if err := doc.ReadFromFile(filename); err != nil {
@@ -85,7 +85,7 @@ func ParseFile(filename string) ([]SvgElement, error) {
 func parseElements(elements []*etree.Element, defaultColor color.Color) ([]SvgElement, error) {
 	var svgElements []SvgElement
 	for _, el := range elements {
-		fillColor := getColor(el.SelectAttrValue("fill", ""))
+		fillColor := GetColor(el.SelectAttrValue("fill", ""))
 		if fillColor == nil {
 			fillColor = defaultColor
 		}
@@ -109,12 +109,12 @@ func parseElements(elements []*etree.Element, defaultColor color.Color) ([]SvgEl
 			y1, _ := strconv.Atoi(el.SelectAttrValue("y1", "0"))
 			x2, _ := strconv.Atoi(el.SelectAttrValue("x2", "0"))
 			y2, _ := strconv.Atoi(el.SelectAttrValue("y2", "0"))
-			strokeColor := getColor(el.SelectAttrValue("stroke", "black"))
+			strokeColor := GetColor(el.SelectAttrValue("stroke", "black"))
 			svgElements = append(svgElements, SvgLine{x1, y1, x2, y2, strokeColor})
 
 		case "path":
 			d := el.SelectAttrValue("d", "")
-			path, err := parsePath(d)
+			path, err := ParsePath(d)
 			if err != nil {
 				return nil, err
 			}
@@ -133,7 +133,7 @@ func parseElements(elements []*etree.Element, defaultColor color.Color) ([]SvgEl
 	return svgElements, nil
 }
 
-func getColor(colorStr string) color.Color {
+func GetColor(colorStr string) color.Color {
 	// If the string is empty, return nil
 	if colorStr == "" {
 		return nil
@@ -178,8 +178,8 @@ func getColor(colorStr string) color.Color {
 	return color.RGBA{0, 0, 0, 255}
 }
 
-// parsePath can parse TinySVG 1.2 path attributes
-func parsePath(d string) (SvgPath, error) {
+// ParsePath will try to parse a TinySVG 1.2 path attribute string
+func ParsePath(d string) (SvgPath, error) {
 	var commands []PathCommand
 	var currentCmd PathCommand
 
