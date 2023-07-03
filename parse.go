@@ -3,10 +3,8 @@ package surrender
 import (
 	"image"
 	"image/color"
-	"log"
 	"strconv"
 	"strings"
-	"unicode"
 
 	"github.com/beevik/etree"
 	"golang.org/x/image/colornames"
@@ -176,68 +174,4 @@ func GetColor(colorStr string) color.Color {
 
 	// If the string is not recognized, return black
 	return color.RGBA{0, 0, 0, 255}
-}
-
-// ParsePath will try to parse a TinySVG 1.2 path attribute string
-func ParsePath(d string) (SvgPath, error) {
-	var commands []PathCommand
-	var currentCmd PathCommand
-
-	// Function to process current command before starting a new one
-	processCurrentCmd := func() {
-		if currentCmd.Type != "" {
-			commands = append(commands, currentCmd)
-		}
-		currentCmd = PathCommand{}
-	}
-
-	for _, cmdStr := range strings.Fields(d) {
-		for _, c := range cmdStr {
-			// If it's a letter, it's a command type
-			if unicode.IsLetter(c) {
-				processCurrentCmd()
-				currentCmd.Type = string(c)
-				continue
-			}
-
-			// If it's not a letter, it should be a part of coordinate
-			coordPart := string(c)
-			switch currentCmd.Type {
-			case "h", "H", "v", "V":
-				val, err := strconv.Atoi(coordPart)
-				if err != nil {
-					log.Printf("Parsing error: %v", err)
-					return SvgPath{}, err
-				}
-				currentCmd.Points = append(currentCmd.Points, image.Point{X: val, Y: val})
-			default:
-				coords := strings.Split(coordPart, ",")
-				for i := 0; i < len(coords); i += 2 {
-					x, err := strconv.Atoi(coords[i])
-					if err != nil {
-						log.Printf("Parsing error: %v", err)
-						return SvgPath{}, err
-					}
-					var y int
-					if i+1 < len(coords) {
-						y, err = strconv.Atoi(coords[i+1])
-						if err != nil {
-							log.Printf("Parsing error: %v", err)
-							return SvgPath{}, err
-						}
-					}
-					currentCmd.Points = append(currentCmd.Points, image.Point{X: x, Y: y})
-				}
-			}
-		}
-	}
-
-	// Make sure to process the last command
-	processCurrentCmd()
-
-	if cmd := currentCmd; cmd.Type != "" {
-		commands = append(commands, cmd)
-	}
-
-	return SvgPath{Commands: commands, Fill: color.RGBA{0, 0, 0, 255}}, nil
 }

@@ -105,3 +105,12 @@ func SavePNG(img *image.RGBA, filename string) error {
 	defer file.Close()
 	return png.Encode(file, img)
 }
+
+// RenderAndSaveSVG takes SVG elements and a background color, creates an image,
+// renders the elements onto the image and saves it as PNG
+func RenderAndSaveSVG(elements []SvgElement, filename string, bgColor color.Color) error {
+	width, height, _ := GetSVGDimensions(filename)
+	img := NewColoredImage(width, height, bgColor)
+	Render(elements, img)
+	return SavePNG(img, filename)
+}
