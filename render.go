@@ -46,7 +46,7 @@ func (p SvgPath) Draw(img *image.RGBA, clr color.Color) {
 }
 
 // Draw method for SvgGroup
-func (g SvgGroup) Draw(img *image.RGBA, clr color.Color) {
+func (g SvgGroup) Draw(img *image.RGBA, _ color.Color) {
 	for _, el := range g.Elements {
 		el.Draw(img, el.Color())
 	}
