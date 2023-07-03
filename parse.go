@@ -52,6 +52,24 @@ type PathCommand struct {
 	Points []image.Point
 }
 
+// New structure for SvgGroup
+type SvgGroup struct {
+	Elements []SvgElement
+	Fill     color.Color
+}
+
+func (g SvgGroup) Color() color.Color {
+	return g.Fill
+}
+
+// Implement Draw for SvgGroup
+func (g SvgGroup) Draw(img *image.RGBA, color color.Color) {
+	// Iterate over child elements and draw them
+	for _, el := range g.Elements {
+		el.Draw(img, color)
+	}
+}
+
 // ParseFile function
 func ParseFile(filename string) ([]SvgElement, error) {
 	doc := etree.NewDocument()
@@ -59,22 +77,30 @@ func ParseFile(filename string) ([]SvgElement, error) {
 		return nil, err
 	}
 
-	var elements []SvgElement
-	for _, el := range doc.SelectElement("svg").ChildElements() {
-		fillColor := getColor(el.SelectAttrValue("fill", "black"))
+	return parseElements(doc.SelectElement("svg").ChildElements(), color.RGBA{0, 0, 0, 255}) // Pass default color
+}
+
+func parseElements(elements []*etree.Element, defaultColor color.Color) ([]SvgElement, error) {
+	var svgElements []SvgElement
+	for _, el := range elements {
+		fillColor := getColor(el.SelectAttrValue("fill", ""))
+		if fillColor == nil {
+			fillColor = defaultColor
+		}
+
 		switch el.Tag {
 		case "circle":
 			x, _ := strconv.Atoi(el.SelectAttrValue("cx", "0"))
 			y, _ := strconv.Atoi(el.SelectAttrValue("cy", "0"))
 			r, _ := strconv.Atoi(el.SelectAttrValue("r", "0"))
-			elements = append(elements, SvgCircle{x, y, r, fillColor})
+			svgElements = append(svgElements, SvgCircle{x, y, r, fillColor})
 
 		case "rect":
 			x, _ := strconv.Atoi(el.SelectAttrValue("x", "0"))
 			y, _ := strconv.Atoi(el.SelectAttrValue("y", "0"))
 			w, _ := strconv.Atoi(el.SelectAttrValue("width", "0"))
 			h, _ := strconv.Atoi(el.SelectAttrValue("height", "0"))
-			elements = append(elements, SvgRectangle{x, y, w, h, fillColor})
+			svgElements = append(svgElements, SvgRectangle{x, y, w, h, fillColor})
 
 		case "path":
 			d := el.SelectAttrValue("d", "")
@@ -83,15 +109,25 @@ func ParseFile(filename string) ([]SvgElement, error) {
 				return nil, err
 			}
 			path.Fill = fillColor
-			elements = append(elements, path)
+			svgElements = append(svgElements, path)
+
+		case "g":
+			childElements, err := parseElements(el.ChildElements(), fillColor)
+			if err != nil {
+				return nil, err
+			}
+			svgElements = append(svgElements, SvgGroup{childElements, fillColor})
 		}
 	}
 
-	return elements, nil
+	return svgElements, nil
 }
 
-// getColor function
+// getColor function, now returns a color or nil
 func getColor(colorName string) color.Color {
+	if colorName == "" {
+		return nil
+	}
 	if c, ok := colornames.Map[colorName]; ok {
 		return c
 	}
