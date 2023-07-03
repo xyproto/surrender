@@ -133,15 +133,49 @@ func parseElements(elements []*etree.Element, defaultColor color.Color) ([]SvgEl
 	return svgElements, nil
 }
 
-// getColor function, now returns a color or nil
-func getColor(colorName string) color.Color {
-	if colorName == "" {
+func getColor(colorStr string) color.Color {
+	// If the string is empty, return nil
+	if colorStr == "" {
 		return nil
 	}
-	if c, ok := colornames.Map[colorName]; ok {
+
+	// If the string is a color name, return the corresponding color
+	if c, ok := colornames.Map[colorStr]; ok {
 		return c
 	}
-	return color.RGBA{0, 0, 0, 255} // default to black if color name is not recognized
+
+	// If the string is an RGB hex code on the form "#fff", convert it to RGBA color
+	if len(colorStr) == 4 && colorStr[0] == '#' {
+		r, _ := strconv.ParseInt(strings.Repeat(string(colorStr[1]), 2), 16, 64)
+		g, _ := strconv.ParseInt(strings.Repeat(string(colorStr[2]), 2), 16, 64)
+		b, _ := strconv.ParseInt(strings.Repeat(string(colorStr[3]), 2), 16, 64)
+		return color.RGBA{uint8(r), uint8(g), uint8(b), 255}
+	}
+
+	// If the string is an RGB hex code on the form "#ffffff", convert it to RGBA color
+	if len(colorStr) == 7 && colorStr[0] == '#' {
+		r, _ := strconv.ParseInt(colorStr[1:3], 16, 64)
+		g, _ := strconv.ParseInt(colorStr[3:5], 16, 64)
+		b, _ := strconv.ParseInt(colorStr[5:7], 16, 64)
+		return color.RGBA{uint8(r), uint8(g), uint8(b), 255}
+	}
+
+	// If the string is an RGB functional notation on the form "rgb(255, 255, 255)",
+	// convert it to RGBA color
+	if strings.HasPrefix(colorStr, "rgb(") && strings.HasSuffix(colorStr, ")") {
+		rgbStr := strings.TrimPrefix(colorStr, "rgb(")
+		rgbStr = strings.TrimSuffix(rgbStr, ")")
+		rgbValues := strings.Split(rgbStr, ",")
+		if len(rgbValues) == 3 {
+			r, _ := strconv.Atoi(strings.TrimSpace(rgbValues[0]))
+			g, _ := strconv.Atoi(strings.TrimSpace(rgbValues[1]))
+			b, _ := strconv.Atoi(strings.TrimSpace(rgbValues[2]))
+			return color.RGBA{uint8(r), uint8(g), uint8(b), 255}
+		}
+	}
+
+	// If the string is not recognized, return black
+	return color.RGBA{0, 0, 0, 255}
 }
 
 // parsePath can parse TinySVG 1.2 path attributes
