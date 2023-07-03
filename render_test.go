@@ -2,41 +2,50 @@ package surrender
 
 import (
 	"image"
+	"image/color"
 	"testing"
 )
 
-// TestRender function
 func TestRender(t *testing.T) {
 	tt := []struct {
 		name    string
-		file    string
-		outfile string
-		imgSize image.Point
+		svgFile string
+		points  []image.Point
+		colors  []color.Color
 	}{
-		{name: "Render Rainforest", file: "testdata/rainforest_2c_opt.svg", outfile: "testdata/rainforest_2c_opt.png", imgSize: image.Point{X: 302, Y: 240}},
+		{
+			name:    "testdata/rainforest_2c_opt.png",
+			svgFile: "testdata/rainforest_2c_opt.svg",
+			points:  []image.Point{image.Point{0, 0}},
+			colors:  []color.Color{color.RGBA{255, 255, 238, 255}},
+		},
+		// Add more test cases here as needed.
 	}
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			// Parse the SVG file
-			elements, err := ParseFile(tc.file)
+			elements, err := ParseFile(tc.svgFile)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			// Create a new RGBA image
-			img := image.NewRGBA(image.Rect(0, 0, tc.imgSize.X, tc.imgSize.Y))
-
-			// Render the SVG elements onto the image
+			img := image.NewRGBA(image.Rect(0, 0, 302, 240))
 			Render(elements, img)
 
-			// Save the image to a file
-			if err := SavePNG(img, tc.outfile); err != nil {
-				t.Fatal(err)
+			for i, point := range tc.points {
+				if i >= len(tc.colors) {
+					t.Fatalf("Not enough expected colors provided for point %v", point)
+				}
+				expectedColor := tc.colors[i]
+				actualColor := img.At(point.X, point.Y)
+				if actualColor != expectedColor {
+					t.Errorf("At point %v, expected color %v, but got %v", point, expectedColor, actualColor)
+				}
 			}
-
-			// Output a message to let the tester know what file to check
-			t.Logf("Saved rendered image to %s. Please verify it looks correct.", tc.outfile)
+			// If all the pixel tests pass, save the image to a PNG file.
+			//if err := SavePNG(img, tc.name+".png"); err != nil {
+			//t.Error(err)
+			//}
 		})
 	}
 }
