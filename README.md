@@ -15,8 +15,9 @@ Currently supported elements (sorta):
 
 ## TODO
 
-- [ ] Be able to render SVG images that are produced by [png2svg](https://github.com/xyproto/png2svg).
-- [ ] Be able to render `g` elements.
+- [x] Be able to render SVG images that are produced by [png2svg](https://github.com/xyproto/png2svg).
+- [x] Be able to render `g` elements.
+- [ ] More robust path data and coordinate parsing.
 
 ## General info
 
